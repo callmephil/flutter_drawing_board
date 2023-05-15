@@ -169,6 +169,7 @@ class SketchPainter extends CustomPainter {
         Paint(),
       );
     }
+    canvas.saveLayer(Rect.largest, Paint());
     for (Sketch sketch in sketches) {
       final points = sketch.points;
       if (points.isEmpty) return;
@@ -219,7 +220,11 @@ class SketchPainter extends CustomPainter {
       // Calculate path's radius from the first and last points
       double radius = (firstPoint - lastPoint).distance / 2;
 
-      if (sketch.type == SketchType.scribble) {
+      if (sketch.type == SketchType.eraser) {
+        paint.blendMode = BlendMode.clear;
+        paint.color=Colors.white;
+        canvas.drawPath(path, paint);
+      } else if (sketch.type == SketchType.scribble) {
         canvas.drawPath(path, paint);
       } else if (sketch.type == SketchType.square) {
         canvas.drawRRect(
@@ -253,6 +258,7 @@ class SketchPainter extends CustomPainter {
         canvas.drawPath(polygonPath, paint);
       }
     }
+    canvas.restore();
   }
 
   @override
