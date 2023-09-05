@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
       title: "Let's Draw",
       theme: ThemeData(primarySwatch: Colors.blue),
       debugShowCheckedModeBanner: false,
-      home: const DrawingPage(),
+      home: const SafeArea(child: DrawingPage()),
     );
   }
 }

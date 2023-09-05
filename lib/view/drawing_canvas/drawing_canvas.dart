@@ -183,7 +183,9 @@ class SketchPainter extends CustomPainter {
       final radius = (firstPoint - lastPoint).distance / 2;
 
       if (sketch.type == SketchType.eraser) {
-        paint.blendMode = BlendMode.clear;
+        paint
+          ..blendMode = BlendMode.clear
+          ..color = Colors.white;
         canvas.drawPath(path, paint);
       } else if (sketch.type == SketchType.scribble) {
         canvas.drawPath(path, paint);

@@ -1,11 +1,11 @@
 {
-    "name": "Let's Draw",
-    "short_name": "Lets Draw",
+    "name": "flutter_drawing_board",
+    "short_name": "flutter_drawing_board",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A simple drawing app made with Flutter",
+    "description": "A new Flutter project.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
