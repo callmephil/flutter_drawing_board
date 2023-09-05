@@ -117,54 +117,22 @@ class SketchPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final paint = Paint()..strokeCap = StrokeCap.round;
+
     if (backgroundImage != null) {
-      canvas.drawImageRect(
-        backgroundImage!,
-        Rect.fromLTWH(
-          0,
-          0,
-          backgroundImage!.width.toDouble(),
-          backgroundImage!.height.toDouble(),
-        ),
-        Rect.fromLTWH(0, 0, size.width, size.height),
-        Paint(),
-      );
+      drawBackgroundImage(canvas, size, backgroundImage!);
     }
     for (final sketch in sketches) {
       final points = sketch.points;
       if (points.isEmpty) return;
 
-      final path = Path()..moveTo(points[0].dx, points[0].dy);
-      if (points.length < 2) {
-        // If the path only has one line, draw a dot.
-        path.addOval(
-          Rect.fromCircle(
-            center: Offset(points[0].dx, points[0].dy),
-            radius: 1,
-          ),
-        );
-      }
+      final path = createPath(points);
 
-      for (var i = 1; i < points.length - 1; ++i) {
-        final p0 = points[i];
-        final p1 = points[i + 1];
-        path.quadraticBezierTo(
-          p0.dx,
-          p0.dy,
-          (p0.dx + p1.dx) / 2,
-          (p0.dy + p1.dy) / 2,
-        );
-      }
-
-      final paint = Paint()
+      // Update paint properties
+      paint
         ..color = sketch.color
-        ..strokeCap = StrokeCap.round;
-
-      if (!sketch.filled) {
-        paint
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = sketch.size;
-      }
+        ..style = sketch.filled ? PaintingStyle.fill : PaintingStyle.stroke
+        ..strokeWidth = sketch.size;
 
       // define first and last points for convenience
       final firstPoint = sketch.points.first;
@@ -179,51 +147,134 @@ class SketchPainter extends CustomPainter {
       // Calculate path's radius from the first and last points
       final radius = (firstPoint - lastPoint).distance / 2;
 
-      if (sketch.type == SketchType.eraser) {
-        paint
-          ..blendMode = BlendMode.clear
-          ..color = Colors.white;
-        canvas.drawPath(path, paint);
-      } else if (sketch.type == SketchType.scribble) {
-        canvas.drawPath(path, paint);
-      } else if (sketch.type == SketchType.square) {
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(rect, const Radius.circular(5)),
-          paint,
-        );
-      } else if (sketch.type == SketchType.line) {
-        canvas.drawLine(firstPoint, lastPoint, paint);
-      } else if (sketch.type == SketchType.circle) {
-        canvas.drawOval(rect, paint);
-        // Uncomment this line if you need a PERFECT CIRCLE
-        // canvas.drawCircle(centerPoint, radius , paint);
-      } else if (sketch.type == SketchType.polygon) {
-        final polygonPath = Path();
-        final sides = sketch.sides;
-        final angle = (math.pi * 2) / sides;
-
-        const radian = 0;
-
-        final startPoint =
-            Offset(radius * math.cos(radian), radius * math.sin(radian));
-
-        polygonPath.moveTo(
-          startPoint.dx + centerPoint.dx,
-          startPoint.dy + centerPoint.dy,
-        );
-        for (var i = 1; i <= sides; i++) {
-          final x = radius * math.cos(radian + angle * i) + centerPoint.dx;
-          final y = radius * math.sin(radian + angle * i) + centerPoint.dy;
-          polygonPath.lineTo(x, y);
-        }
-        polygonPath.close();
-        canvas.drawPath(polygonPath, paint);
-      }
+      drawSketch(canvas, sketch, path, paint, rect, centerPoint, radius);
     }
 
     canvas
       ..saveLayer(Rect.largest, Paint())
       ..restore();
+  }
+
+  static void drawBackgroundImage(Canvas canvas, Size size, Image image) {
+    canvas.drawImageRect(
+      image,
+      Rect.fromLTWH(
+        0,
+        0,
+        image.width.toDouble(),
+        image.height.toDouble(),
+      ),
+      Rect.fromLTWH(0, 0, size.width, size.height),
+      Paint(),
+    );
+  }
+
+  Path createPath(List<Offset> points) {
+    final path = Path()..moveTo(points[0].dx, points[0].dy);
+    if (points.length < 2) {
+      // If the path only has one line, draw a dot.
+      path.addOval(
+        Rect.fromCircle(
+          center: Offset(points[0].dx, points[0].dy),
+          radius: 1,
+        ),
+      );
+    }
+
+    for (var i = 1; i < points.length - 1; ++i) {
+      final p0 = points[i];
+      final p1 = points[i + 1];
+      path.quadraticBezierTo(
+        p0.dx,
+        p0.dy,
+        (p0.dx + p1.dx) / 2,
+        (p0.dy + p1.dy) / 2,
+      );
+    }
+
+    return path;
+  }
+
+  // ignore: long-parameter-list
+  static void drawSketch(
+    Canvas canvas,
+    Sketch sketch,
+    Path path,
+    Paint paint,
+    Rect rect,
+    Offset centerPoint,
+    double radius,
+  ) {
+    switch (sketch.type) {
+      case SketchType.eraser:
+        drawEraser(canvas, path, paint);
+      case SketchType.scribble:
+        drawScribble(canvas, path, paint);
+      case SketchType.square:
+        drawSquare(canvas, rect, paint);
+      case SketchType.line:
+        drawLine(canvas, sketch, paint);
+      case SketchType.circle:
+        drawCircle(canvas, rect, paint);
+      case SketchType.polygon:
+        drawPolygon(canvas, sketch, paint, centerPoint, radius);
+    }
+  }
+
+  static void drawEraser(Canvas canvas, Path path, Paint paint) {
+    paint
+      ..blendMode = BlendMode.clear
+      ..color = Colors.white;
+    canvas.drawPath(path, paint);
+  }
+
+  static void drawScribble(Canvas canvas, Path path, Paint paint) {
+    canvas.drawPath(path, paint);
+  }
+
+  static void drawSquare(Canvas canvas, Rect rect, Paint paint) {
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect, const Radius.circular(5)),
+      paint,
+    );
+  }
+
+  static void drawLine(Canvas canvas, Sketch sketch, Paint paint) {
+    canvas.drawLine(sketch.points.first, sketch.points.last, paint);
+  }
+
+  static void drawCircle(Canvas canvas, Rect rect, Paint paint) {
+    canvas.drawOval(rect, paint);
+  }
+
+  // ignore: long-parameter-list
+  static void drawPolygon(
+    Canvas canvas,
+    Sketch sketch,
+    Paint paint,
+    Offset centerPoint,
+    double radius,
+  ) {
+    final polygonPath = Path();
+    final sides = sketch.sides;
+    final angle = (math.pi * 2) / sides;
+
+    const radian = 0;
+
+    final startPoint =
+        Offset(radius * math.cos(radian), radius * math.sin(radian));
+
+    polygonPath.moveTo(
+      startPoint.dx + centerPoint.dx,
+      startPoint.dy + centerPoint.dy,
+    );
+    for (var i = 1; i <= sides; i++) {
+      final x = radius * math.cos(radian + angle * i) + centerPoint.dx;
+      final y = radius * math.sin(radian + angle * i) + centerPoint.dy;
+      polygonPath.lineTo(x, y);
+    }
+    polygonPath.close();
+    canvas.drawPath(polygonPath, paint);
   }
 
   @override
