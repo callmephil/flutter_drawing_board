@@ -58,70 +58,7 @@ class CanvasSideBar extends StatelessWidget {
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           const Divider(),
-          RepaintBoundary(
-            child: ValueListenableBuilder(
-              valueListenable: drawingMode,
-              builder: (_, it, __) {
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Wrap(
-                      spacing: 5,
-                      runSpacing: 5,
-                      children: [
-                        _IconBox(
-                          iconData: Icons.edit_outlined,
-                          selected: it == DrawingMode.pencil,
-                          onTap: () => drawingMode.value = DrawingMode.pencil,
-                          tooltip: 'Pencil',
-                        ),
-                        _IconBox(
-                          selected: it == DrawingMode.line,
-                          onTap: () => drawingMode.value = DrawingMode.line,
-                          tooltip: 'Line',
-                          child: Center(
-                            child: SizedBox(
-                              width: 22,
-                              height: 2,
-                              child: ColoredBox(
-                                color: drawingMode.value == DrawingMode.line
-                                    ? Colors.grey.shade900
-                                    : Colors.grey,
-                              ),
-                            ),
-                          ),
-                        ),
-                        _IconBox(
-                          iconData: Icons.hexagon_outlined,
-                          selected: it == DrawingMode.polygon,
-                          onTap: () => drawingMode.value = DrawingMode.polygon,
-                          tooltip: 'Polygon',
-                        ),
-                        _IconBox(
-                          iconData: Icons.square_outlined,
-                          selected: it == DrawingMode.square,
-                          onTap: () => drawingMode.value = DrawingMode.square,
-                          tooltip: 'Square',
-                        ),
-                        _IconBox(
-                          iconData: Icons.circle_outlined,
-                          selected: it == DrawingMode.circle,
-                          onTap: () => drawingMode.value = DrawingMode.circle,
-                          tooltip: 'Circle',
-                        ),
-                      ],
-                    ),
-                    _IconBox(
-                      iconData: Icons.edit_off_outlined,
-                      selected: it == DrawingMode.eraser,
-                      onTap: () => drawingMode.value = DrawingMode.eraser,
-                      tooltip: 'Eraser',
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
+          _ShapeSection(drawingMode: drawingMode),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -188,56 +125,7 @@ class CanvasSideBar extends StatelessWidget {
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           const Divider(),
-          Row(
-            children: [
-              const Text(
-                'Stroke Size: ',
-                style: TextStyle(fontSize: 12),
-              ),
-              RepaintBoundary(
-                child: ValueListenableBuilder(
-                  valueListenable: strokeSize,
-                  builder: (_, it, __) {
-                    return Slider(
-                      value: it,
-                      min: 1,
-                      max: 50,
-                      divisions: 50,
-                      label: it.toStringAsFixed(0),
-                      onChanged: (val) {
-                        strokeSize.value = val;
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              const Text(
-                'Eraser Size: ',
-                style: TextStyle(fontSize: 12),
-              ),
-              RepaintBoundary(
-                child: ValueListenableBuilder(
-                  valueListenable: eraserSize,
-                  builder: (_, it, __) {
-                    return Slider(
-                      value: it,
-                      min: 1,
-                      max: 80,
-                      divisions: 80,
-                      label: it.toStringAsFixed(0),
-                      onChanged: (val) {
-                        eraserSize.value = val;
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
+          _SizesSection(strokeSize: strokeSize, eraserSize: eraserSize),
           const SizedBox(height: 20),
           const Text(
             'Actions',
@@ -373,56 +261,6 @@ class CanvasSideBar extends StatelessWidget {
   }
 }
 
-class _IconBox extends StatelessWidget {
-  const _IconBox({
-    this.iconData,
-    this.child,
-    this.tooltip,
-    required this.selected,
-    required this.onTap,
-  }) : assert(
-          child != null || iconData != null,
-          '_IconBox child or iconData is null',
-        );
-  final IconData? iconData;
-  final Widget? child;
-  final bool selected;
-  final VoidCallback onTap;
-  final String? tooltip;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: onTap,
-        child: SizedBox.square(
-          dimension: 35,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: selected ? Colors.grey[900]! : Colors.grey,
-                width: 1.5,
-              ),
-              borderRadius: const BorderRadius.all(Radius.circular(5)),
-            ),
-            child: Tooltip(
-              message: tooltip,
-              preferBelow: false,
-              child: child ??
-                  Icon(
-                    iconData,
-                    color: selected ? Colors.grey[900] : Colors.grey,
-                    size: 20,
-                  ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 ///A data structure for undoing and redoing sketches.
 class _UndoRedoStack {
   _UndoRedoStack({
@@ -483,5 +321,194 @@ class _UndoRedoStack {
 
   void dispose() {
     sketchesNotifier.removeListener(_sketchesCountListener);
+  }
+}
+
+class _ShapeSection extends StatelessWidget {
+  const _ShapeSection({required this.drawingMode});
+  final ValueNotifier<DrawingMode> drawingMode;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: drawingMode,
+      builder: (_, it, __) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Wrap(
+              spacing: 5,
+              runSpacing: 5,
+              children: [
+                _IconBox(
+                  iconData: Icons.edit_outlined,
+                  selected: it == DrawingMode.pencil,
+                  onTap: () => drawingMode.value = DrawingMode.pencil,
+                  tooltip: 'Pencil',
+                ),
+                _IconBox(
+                  selected: it == DrawingMode.line,
+                  onTap: () => drawingMode.value = DrawingMode.line,
+                  tooltip: 'Line',
+                  child: Center(
+                    child: SizedBox(
+                      width: 22,
+                      height: 2,
+                      child: ColoredBox(
+                        color: drawingMode.value == DrawingMode.line
+                            ? Colors.grey.shade900
+                            : Colors.grey,
+                      ),
+                    ),
+                  ),
+                ),
+                _IconBox(
+                  iconData: Icons.hexagon_outlined,
+                  selected: it == DrawingMode.polygon,
+                  onTap: () => drawingMode.value = DrawingMode.polygon,
+                  tooltip: 'Polygon',
+                ),
+                _IconBox(
+                  iconData: Icons.square_outlined,
+                  selected: it == DrawingMode.square,
+                  onTap: () => drawingMode.value = DrawingMode.square,
+                  tooltip: 'Square',
+                ),
+                _IconBox(
+                  iconData: Icons.circle_outlined,
+                  selected: it == DrawingMode.circle,
+                  onTap: () => drawingMode.value = DrawingMode.circle,
+                  tooltip: 'Circle',
+                ),
+              ],
+            ),
+            _IconBox(
+              iconData: Icons.edit_off_outlined,
+              selected: it == DrawingMode.eraser,
+              onTap: () => drawingMode.value = DrawingMode.eraser,
+              tooltip: 'Eraser',
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _IconBox extends StatelessWidget {
+  const _IconBox({
+    this.iconData,
+    this.child,
+    this.tooltip,
+    required this.selected,
+    required this.onTap,
+  }) : assert(
+          child != null || iconData != null,
+          '_IconBox child or iconData is null',
+        );
+  final IconData? iconData;
+  final Widget? child;
+  final bool selected;
+  final VoidCallback onTap;
+  final String? tooltip;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onTap,
+        child: SizedBox.square(
+          dimension: 35,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: selected ? Colors.grey[900]! : Colors.grey,
+                width: 1.5,
+              ),
+              borderRadius: const BorderRadius.all(Radius.circular(5)),
+            ),
+            child: Tooltip(
+              message: tooltip,
+              preferBelow: false,
+              child: child ??
+                  Icon(
+                    iconData,
+                    color: selected ? Colors.grey[900] : Colors.grey,
+                    size: 20,
+                  ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SizesSection extends StatelessWidget {
+  const _SizesSection({
+    required this.strokeSize,
+    required this.eraserSize,
+  });
+
+  final ValueNotifier<double> strokeSize;
+  final ValueNotifier<double> eraserSize;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            const Text(
+              'Stroke Size: ',
+              style: TextStyle(fontSize: 12),
+            ),
+            RepaintBoundary(
+              child: ValueListenableBuilder(
+                valueListenable: strokeSize,
+                builder: (_, it, __) {
+                  return Slider(
+                    value: it,
+                    min: 1,
+                    max: 50,
+                    divisions: 50,
+                    label: it.toStringAsFixed(0),
+                    onChanged: (val) {
+                      strokeSize.value = val;
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            const Text(
+              'Eraser Size: ',
+              style: TextStyle(fontSize: 12),
+            ),
+            RepaintBoundary(
+              child: ValueListenableBuilder(
+                valueListenable: eraserSize,
+                builder: (_, it, __) {
+                  return Slider(
+                    value: it,
+                    min: 1,
+                    max: 80,
+                    divisions: 80,
+                    label: it.toStringAsFixed(0),
+                    onChanged: (val) {
+                      eraserSize.value = val;
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
   }
 }
