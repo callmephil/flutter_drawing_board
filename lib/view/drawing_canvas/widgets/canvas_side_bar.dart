@@ -1,8 +1,7 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:ui' as ui;
 
-import 'package:file_picker/file_picker.dart';
+// import 'package:file_picker/file_picker.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Image;
@@ -13,9 +12,7 @@ import 'package:flutter_drawing_board/view/drawing_canvas/models/drawing_mode.da
 import 'package:flutter_drawing_board/view/drawing_canvas/models/sketch.dart';
 import 'package:flutter_drawing_board/view/drawing_canvas/widgets/color_palette.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:universal_html/html.dart' as html;
 import 'package:url_launcher/url_launcher.dart';
 
 class CanvasSideBar extends HookWidget {
@@ -72,7 +69,7 @@ class CanvasSideBar extends HookWidget {
             runSpacing: 5,
             children: [
               _IconBox(
-                iconData: FontAwesomeIcons.pencil,
+                iconData: Icons.edit_outlined,
                 selected: drawingMode.value == DrawingMode.pencil,
                 onTap: () => drawingMode.value = DrawingMode.pencil,
                 tooltip: 'Pencil',
@@ -81,19 +78,16 @@ class CanvasSideBar extends HookWidget {
                 selected: drawingMode.value == DrawingMode.line,
                 onTap: () => drawingMode.value = DrawingMode.line,
                 tooltip: 'Line',
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: 22,
-                      height: 2,
-                      child: ColoredBox(
-                        color: drawingMode.value == DrawingMode.line
-                            ? Colors.grey.shade900
-                            : Colors.grey,
-                      ),
+                child: Center(
+                  child: SizedBox(
+                    width: 22,
+                    height: 2,
+                    child: ColoredBox(
+                      color: drawingMode.value == DrawingMode.line
+                          ? Colors.grey.shade900
+                          : Colors.grey,
                     ),
-                  ],
+                  ),
                 ),
               ),
               _IconBox(
@@ -103,19 +97,19 @@ class CanvasSideBar extends HookWidget {
                 tooltip: 'Polygon',
               ),
               _IconBox(
-                iconData: FontAwesomeIcons.eraser,
+                iconData: Icons.edit_off_outlined,
                 selected: drawingMode.value == DrawingMode.eraser,
                 onTap: () => drawingMode.value = DrawingMode.eraser,
                 tooltip: 'Eraser',
               ),
               _IconBox(
-                iconData: FontAwesomeIcons.square,
+                iconData: Icons.square_outlined,
                 selected: drawingMode.value == DrawingMode.square,
                 onTap: () => drawingMode.value = DrawingMode.square,
                 tooltip: 'Square',
               ),
               _IconBox(
-                iconData: FontAwesomeIcons.circle,
+                iconData: Icons.circle_outlined,
                 selected: drawingMode.value == DrawingMode.circle,
                 onTap: () => drawingMode.value = DrawingMode.circle,
                 tooltip: 'Circle',
@@ -306,64 +300,32 @@ class CanvasSideBar extends HookWidget {
   }
 
   Future<void> saveFile(Uint8List bytes, String ext) async {
-    if (kIsWeb) {
-      html.AnchorElement()
-        ..href = '${Uri.dataFromBytes(bytes, mimeType: 'image/$ext')}'
-        ..download = 'FlutterLetsDraw-${DateTime.now().toIso8601String()}.$ext'
-        ..style.display = 'none'
-        ..click();
-    } else {
-      await FileSaver.instance.saveFile(
-        name: 'FlutterLetsDraw-${DateTime.now().toIso8601String()}.$ext',
-        bytes: bytes,
-        ext: ext,
-        mimeType: ext == 'png' ? MimeType.png : MimeType.jpeg,
-      );
-    }
+    await FileSaver.instance.saveFile(
+      name: 'Drawing-${DateTime.now().toIso8601String()}.$ext',
+      bytes: bytes,
+      ext: ext,
+      mimeType: ext == 'png' ? MimeType.png : MimeType.jpeg,
+    );
   }
 
   Future<ui.Image> get _getImage async {
     final completer = Completer<ui.Image>();
-    if (!kIsWeb && !Platform.isAndroid && !Platform.isIOS) {
-      final file = await FilePicker.platform.pickFiles(
-        type: FileType.image,
+    final image = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      final bytes = await image.readAsBytes();
+      completer.complete(
+        decodeImageFromList(bytes),
       );
-      if (file != null) {
-        final filePath = file.files.single.path;
-        final bytes = filePath == null
-            ? file.files.first.bytes
-            : File(filePath).readAsBytesSync();
-        if (bytes != null) {
-          completer.complete(decodeImageFromList(bytes));
-        } else {
-          completer.completeError('No image selected');
-        }
-      }
     } else {
-      final image = await ImagePicker().pickImage(source: ImageSource.gallery);
-      if (image != null) {
-        final bytes = await image.readAsBytes();
-        completer.complete(
-          decodeImageFromList(bytes),
-        );
-      } else {
-        completer.completeError('No image selected');
-      }
+      completer.completeError('No image selected');
     }
 
     return completer.future;
   }
 
   Future<void> _launchUrl(String url) async {
-    if (kIsWeb) {
-      html.window.open(
-        url,
-        url,
-      );
-    } else {
-      if (!await launchUrl(Uri.parse(url))) {
-        throw Exception('Could not launch $url');
-      }
+    if (!await launchUrl(Uri.parse(url))) {
+      throw Exception('Could not launch $url');
     }
   }
 
