@@ -31,7 +31,10 @@ class _DrawingPageState extends State<DrawingPage> {
     final allSketches = ValueNotifier<List<Sketch>>([]);
 
     return Scaffold(
-      drawer: Drawer(
+      backgroundColor: kCanvasColor,
+      key: const ValueKey('drawing_scaffold'),
+      endDrawer: Drawer(
+        key: const ValueKey('drawing_drawer'),
         child: CanvasSideBar(
           drawingMode: drawingMode,
           selectedColor: selectedColor,
@@ -45,23 +48,13 @@ class _DrawingPageState extends State<DrawingPage> {
           backgroundImage: backgroundImage,
         ),
       ),
-      appBar: AppBar(
-        title: const Text(
-          "Let's Draw",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 19,
-          ),
-        ),
-      ),
-      body: SizedBox(
-        width: double.maxFinite,
-        height: double.maxFinite,
-        child: ColoredBox(
-          color: kCanvasColor,
-          child: DrawingCanvas(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
+      body: Stack(
+        key: const ValueKey('drawing_stack'),
+        children: [
+          DrawingCanvas(
+            key: const ValueKey('drawing_canvas'),
+            width: double.infinity,
+            height: double.infinity,
             drawingMode: drawingMode,
             selectedColor: selectedColor,
             strokeSize: strokeSize,
@@ -73,7 +66,31 @@ class _DrawingPageState extends State<DrawingPage> {
             polygonSides: polygonSides,
             backgroundImage: backgroundImage,
           ),
-        ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            key: const ValueKey('drawing_drawer_button_row'),
+            children: [
+              if (Navigator.of(context).canPop())
+                ColoredBox(
+                  key: const ValueKey('drawing_back_button'),
+                  color: kCanvasColor,
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ),
+              const Spacer(),
+              const ColoredBox(
+                key: ValueKey('drawing_drawer_button'),
+                color: kCanvasColor,
+                child: EndDrawerButton(),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

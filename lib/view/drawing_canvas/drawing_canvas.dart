@@ -102,6 +102,8 @@ class DrawingCanvas extends StatelessWidget {
   }
 
   void onPointerUp(PointerUpEvent _) {
+    if (currentSketch.value == null) return;
+
     allSketches.value = List<Sketch>.from(allSketches.value)
       ..add(currentSketch.value!);
   }
@@ -117,8 +119,6 @@ class SketchPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..strokeCap = StrokeCap.round;
-
     if (backgroundImage != null) {
       drawBackgroundImage(canvas, size, backgroundImage!);
     }
@@ -127,12 +127,7 @@ class SketchPainter extends CustomPainter {
       if (points.isEmpty) return;
 
       final path = createPath(points);
-
-      // Update paint properties
-      paint
-        ..color = sketch.color
-        ..style = sketch.filled ? PaintingStyle.fill : PaintingStyle.stroke
-        ..strokeWidth = sketch.size;
+      final paint = createPaint(sketch);
 
       // define first and last points for convenience
       final firstPoint = sketch.points.first;
@@ -149,10 +144,6 @@ class SketchPainter extends CustomPainter {
 
       drawSketch(canvas, sketch, path, paint, rect, centerPoint, radius);
     }
-
-    canvas
-      ..saveLayer(Rect.largest, Paint())
-      ..restore();
   }
 
   static void drawBackgroundImage(Canvas canvas, Size size, Image image) {
@@ -193,6 +184,20 @@ class SketchPainter extends CustomPainter {
     }
 
     return path;
+  }
+
+  Paint createPaint(Sketch sketch) {
+    final paint = Paint()
+      ..color = sketch.color
+      ..strokeCap = StrokeCap.round;
+
+    if (!sketch.filled) {
+      paint
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = sketch.size;
+    }
+
+    return paint;
   }
 
   // ignore: long-parameter-list
@@ -307,21 +312,21 @@ class BuildCurrentPath extends StatelessWidget {
       onPointerDown: onPointerDown,
       onPointerMove: onPointerMove,
       onPointerUp: onPointerUp,
-      child: ValueListenableBuilder(
-        valueListenable: currentSketch,
-        builder: (context, sketch, child) {
-          return RepaintBoundary(
-            child: SizedBox(
-              height: height,
-              width: width,
-              child: CustomPaint(
+      child: RepaintBoundary(
+        child: SizedBox(
+          height: height,
+          width: width,
+          child: ValueListenableBuilder(
+            valueListenable: currentSketch,
+            builder: (context, sketch, child) {
+              return CustomPaint(
                 painter: SketchPainter(
                   sketches: sketch == null ? [] : [sketch],
                 ),
-              ),
-            ),
-          );
-        },
+              );
+            },
+          ),
+        ),
       ),
     );
   }
@@ -348,26 +353,26 @@ class BuildAllSketches extends StatelessWidget {
     return SizedBox(
       height: height,
       width: width,
-      child: ValueListenableBuilder<List<Sketch>>(
-        valueListenable: allSketches,
-        builder: (context, sketches, __) {
-          return RepaintBoundary(
-            key: canvasGlobalKey,
-            child: SizedBox(
-              height: height,
-              width: width,
-              child: ColoredBox(
-                color: kCanvasColor,
-                child: CustomPaint(
+      child: RepaintBoundary(
+        key: canvasGlobalKey,
+        child: SizedBox(
+          height: height,
+          width: width,
+          child: ColoredBox(
+            color: kCanvasColor,
+            child: ValueListenableBuilder<List<Sketch>>(
+              valueListenable: allSketches,
+              builder: (_, sketches, __) {
+                return CustomPaint(
                   painter: SketchPainter(
                     sketches: sketches,
                     backgroundImage: backgroundImage.value,
                   ),
-                ),
-              ),
+                );
+              },
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
