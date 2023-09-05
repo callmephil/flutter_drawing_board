@@ -5,9 +5,8 @@ import 'package:flutter/material.dart' hide Image;
 import 'package:flutter_drawing_board/main.dart';
 import 'package:flutter_drawing_board/view/drawing_canvas/models/drawing_mode.dart';
 import 'package:flutter_drawing_board/view/drawing_canvas/models/sketch.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 
-class DrawingCanvas extends HookWidget {
+class DrawingCanvas extends StatelessWidget {
   const DrawingCanvas({
     super.key,
     required this.height,
@@ -16,7 +15,6 @@ class DrawingCanvas extends HookWidget {
     required this.strokeSize,
     required this.eraserSize,
     required this.drawingMode,
-    required this.sideBarController,
     required this.currentSketch,
     required this.allSketches,
     required this.canvasGlobalKey,
@@ -31,7 +29,6 @@ class DrawingCanvas extends HookWidget {
   final ValueNotifier<Image?> backgroundImage;
   final ValueNotifier<double> eraserSize;
   final ValueNotifier<DrawingMode> drawingMode;
-  final AnimationController sideBarController;
   final ValueNotifier<Sketch?> currentSketch;
   final ValueNotifier<List<Sketch>> allSketches;
   final GlobalKey canvasGlobalKey;

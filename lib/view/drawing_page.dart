@@ -6,30 +6,29 @@ import 'package:flutter_drawing_board/view/drawing_canvas/drawing_canvas.dart';
 import 'package:flutter_drawing_board/view/drawing_canvas/models/drawing_mode.dart';
 import 'package:flutter_drawing_board/view/drawing_canvas/models/sketch.dart';
 import 'package:flutter_drawing_board/view/drawing_canvas/widgets/canvas_side_bar.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 
-class DrawingPage extends HookWidget {
+class DrawingPage extends StatefulWidget {
   const DrawingPage({super.key});
 
   @override
+  State<DrawingPage> createState() => _DrawingPageState();
+}
+
+class _DrawingPageState extends State<DrawingPage> {
+  @override
   Widget build(BuildContext context) {
-    final selectedColor = useState(Colors.black);
-    final strokeSize = useState<double>(10);
-    final eraserSize = useState<double>(30);
-    final drawingMode = useState(DrawingMode.pencil);
-    final filled = useState<bool>(false);
-    final polygonSides = useState<int>(3);
-    final backgroundImage = useState<Image?>(null);
+    final selectedColor = ValueNotifier(Colors.black);
+    final strokeSize = ValueNotifier<double>(10);
+    final eraserSize = ValueNotifier<double>(30);
+    final drawingMode = ValueNotifier(DrawingMode.pencil);
+    final filled = ValueNotifier<bool>(false);
+    final polygonSides = ValueNotifier<int>(3);
+    final backgroundImage = ValueNotifier<Image?>(null);
 
     final canvasGlobalKey = GlobalKey();
 
-    final currentSketch = useState<Sketch?>(null);
-    final allSketches = useState(<Sketch>[]);
-
-    final animationController = useAnimationController(
-      duration: const Duration(milliseconds: 150),
-      initialValue: 1,
-    );
+    final currentSketch = ValueNotifier<Sketch?>(null);
+    final allSketches = ValueNotifier<List<Sketch>>([]);
 
     return Scaffold(
       drawer: Drawer(
@@ -67,7 +66,6 @@ class DrawingPage extends HookWidget {
             selectedColor: selectedColor,
             strokeSize: strokeSize,
             eraserSize: eraserSize,
-            sideBarController: animationController,
             currentSketch: currentSketch,
             allSketches: allSketches,
             canvasGlobalKey: canvasGlobalKey,

@@ -11,11 +11,10 @@ import 'package:flutter_drawing_board/main.dart';
 import 'package:flutter_drawing_board/view/drawing_canvas/models/drawing_mode.dart';
 import 'package:flutter_drawing_board/view/drawing_canvas/models/sketch.dart';
 import 'package:flutter_drawing_board/view/drawing_canvas/widgets/color_palette.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class CanvasSideBar extends HookWidget {
+class CanvasSideBar extends StatelessWidget {
   const CanvasSideBar({
     super.key,
     required this.selectedColor,
@@ -42,21 +41,17 @@ class CanvasSideBar extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final undoRedoStack = useState(
+    final undoRedoStack = ValueNotifier(
       _UndoRedoStack(
         sketchesNotifier: allSketches,
         currentSketchNotifier: currentSketch,
       ),
     );
-    final scrollController = useScrollController();
 
-    return Scrollbar(
-      controller: scrollController,
-      thumbVisibility: true,
-      trackVisibility: true,
-      child: ListView(
-        padding: const EdgeInsets.all(10),
-        controller: scrollController,
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: 10),
           const Text(
@@ -64,57 +59,64 @@ class CanvasSideBar extends HookWidget {
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           const Divider(),
-          Wrap(
-            spacing: 5,
-            runSpacing: 5,
-            children: [
-              _IconBox(
-                iconData: Icons.edit_outlined,
-                selected: drawingMode.value == DrawingMode.pencil,
-                onTap: () => drawingMode.value = DrawingMode.pencil,
-                tooltip: 'Pencil',
-              ),
-              _IconBox(
-                selected: drawingMode.value == DrawingMode.line,
-                onTap: () => drawingMode.value = DrawingMode.line,
-                tooltip: 'Line',
-                child: Center(
-                  child: SizedBox(
-                    width: 22,
-                    height: 2,
-                    child: ColoredBox(
-                      color: drawingMode.value == DrawingMode.line
-                          ? Colors.grey.shade900
-                          : Colors.grey,
+          RepaintBoundary(
+            child: ValueListenableBuilder(
+              valueListenable: drawingMode,
+              builder: (_, it, __) {
+                return Wrap(
+                  spacing: 5,
+                  runSpacing: 5,
+                  children: [
+                    _IconBox(
+                      iconData: Icons.edit_outlined,
+                      selected: it == DrawingMode.pencil,
+                      onTap: () => drawingMode.value = DrawingMode.pencil,
+                      tooltip: 'Pencil',
                     ),
-                  ),
-                ),
-              ),
-              _IconBox(
-                iconData: Icons.hexagon_outlined,
-                selected: drawingMode.value == DrawingMode.polygon,
-                onTap: () => drawingMode.value = DrawingMode.polygon,
-                tooltip: 'Polygon',
-              ),
-              _IconBox(
-                iconData: Icons.edit_off_outlined,
-                selected: drawingMode.value == DrawingMode.eraser,
-                onTap: () => drawingMode.value = DrawingMode.eraser,
-                tooltip: 'Eraser',
-              ),
-              _IconBox(
-                iconData: Icons.square_outlined,
-                selected: drawingMode.value == DrawingMode.square,
-                onTap: () => drawingMode.value = DrawingMode.square,
-                tooltip: 'Square',
-              ),
-              _IconBox(
-                iconData: Icons.circle_outlined,
-                selected: drawingMode.value == DrawingMode.circle,
-                onTap: () => drawingMode.value = DrawingMode.circle,
-                tooltip: 'Circle',
-              ),
-            ],
+                    _IconBox(
+                      selected: it == DrawingMode.line,
+                      onTap: () => drawingMode.value = DrawingMode.line,
+                      tooltip: 'Line',
+                      child: Center(
+                        child: SizedBox(
+                          width: 22,
+                          height: 2,
+                          child: ColoredBox(
+                            color: drawingMode.value == DrawingMode.line
+                                ? Colors.grey.shade900
+                                : Colors.grey,
+                          ),
+                        ),
+                      ),
+                    ),
+                    _IconBox(
+                      iconData: Icons.hexagon_outlined,
+                      selected: it == DrawingMode.polygon,
+                      onTap: () => drawingMode.value = DrawingMode.polygon,
+                      tooltip: 'Polygon',
+                    ),
+                    _IconBox(
+                      iconData: Icons.edit_off_outlined,
+                      selected: it == DrawingMode.eraser,
+                      onTap: () => drawingMode.value = DrawingMode.eraser,
+                      tooltip: 'Eraser',
+                    ),
+                    _IconBox(
+                      iconData: Icons.square_outlined,
+                      selected: it == DrawingMode.square,
+                      onTap: () => drawingMode.value = DrawingMode.square,
+                      tooltip: 'Square',
+                    ),
+                    _IconBox(
+                      iconData: Icons.circle_outlined,
+                      selected: it == DrawingMode.circle,
+                      onTap: () => drawingMode.value = DrawingMode.circle,
+                      tooltip: 'Circle',
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
           const SizedBox(height: 8),
           Row(
@@ -123,36 +125,51 @@ class CanvasSideBar extends HookWidget {
                 'Fill Shape: ',
                 style: TextStyle(fontSize: 12),
               ),
-              Checkbox(
-                value: filled.value,
-                onChanged: (val) {
-                  filled.value = val ?? false;
-                },
+              ValueListenableBuilder(
+                valueListenable: filled,
+                builder: (_, it, __) => RepaintBoundary(
+                  child: Checkbox(
+                    value: filled.value,
+                    onChanged: (val) {
+                      filled.value = val ?? false;
+                    },
+                  ),
+                ),
               ),
             ],
           ),
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 150),
-            child: drawingMode.value == DrawingMode.polygon
-                ? Row(
-                    children: [
-                      const Text(
-                        'Polygon Sides: ',
-                        style: TextStyle(fontSize: 12),
-                      ),
-                      Slider(
-                        value: polygonSides.value.toDouble(),
-                        min: 3,
-                        max: 8,
-                        onChanged: (val) {
-                          polygonSides.value = val.toInt();
-                        },
-                        label: '${polygonSides.value}',
-                        divisions: 5,
-                      ),
-                    ],
-                  )
-                : const SizedBox.shrink(),
+          ValueListenableBuilder(
+            valueListenable: drawingMode,
+            builder: (_, it, __) {
+              return AnimatedSwitcher(
+                duration: const Duration(milliseconds: 150),
+                child: it == DrawingMode.polygon
+                    ? Row(
+                        children: [
+                          const Text(
+                            'Polygon Sides: ',
+                            style: TextStyle(fontSize: 12),
+                          ),
+                          ValueListenableBuilder(
+                            valueListenable: polygonSides,
+                            builder: (_, it, __) {
+                              return Slider(
+                                value: it.toDouble(),
+                                min: 3,
+                                max: 8,
+                                onChanged: (val) {
+                                  polygonSides.value = val.toInt();
+                                },
+                                label: '$it',
+                                divisions: 5,
+                              );
+                            },
+                          ),
+                        ],
+                      )
+                    : const SizedBox.shrink(),
+              );
+            },
           ),
           const SizedBox(height: 10),
           const Text(
@@ -160,9 +177,7 @@ class CanvasSideBar extends HookWidget {
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           const Divider(),
-          ColorPalette(
-            selectedColor: selectedColor,
-          ),
+          ColorPalette(selectedColor: selectedColor),
           const SizedBox(height: 20),
           const Text(
             'Size',
@@ -175,15 +190,22 @@ class CanvasSideBar extends HookWidget {
                 'Stroke Size: ',
                 style: TextStyle(fontSize: 12),
               ),
-              Slider(
-                value: strokeSize.value,
-                min: 1,
-                max: 50,
-                divisions: 50,
-                label: strokeSize.value.toStringAsFixed(0),
-                onChanged: (val) {
-                  strokeSize.value = val;
-                },
+              RepaintBoundary(
+                child: ValueListenableBuilder(
+                  valueListenable: strokeSize,
+                  builder: (_, it, __) {
+                    return Slider(
+                      value: it,
+                      min: 1,
+                      max: 50,
+                      divisions: 50,
+                      label: it.toStringAsFixed(0),
+                      onChanged: (val) {
+                        strokeSize.value = val;
+                      },
+                    );
+                  },
+                ),
               ),
             ],
           ),
@@ -193,15 +215,22 @@ class CanvasSideBar extends HookWidget {
                 'Eraser Size: ',
                 style: TextStyle(fontSize: 12),
               ),
-              Slider(
-                value: eraserSize.value,
-                min: 1,
-                max: 80,
-                divisions: 80,
-                label: eraserSize.value.toStringAsFixed(0),
-                onChanged: (val) {
-                  eraserSize.value = val;
-                },
+              RepaintBoundary(
+                child: ValueListenableBuilder(
+                  valueListenable: eraserSize,
+                  builder: (_, it, __) {
+                    return Slider(
+                      value: it,
+                      min: 1,
+                      max: 80,
+                      divisions: 80,
+                      label: it.toStringAsFixed(0),
+                      onChanged: (val) {
+                        eraserSize.value = val;
+                      },
+                    );
+                  },
+                ),
               ),
             ],
           ),
@@ -213,25 +242,25 @@ class CanvasSideBar extends HookWidget {
           const Divider(),
           Wrap(
             children: [
-              TextButton(
-                onPressed: allSketches.value.isNotEmpty
-                    ? () => undoRedoStack.value.undo()
-                    : null,
-                child: const Text('Undo'),
+              ValueListenableBuilder(
+                valueListenable: allSketches,
+                builder: (_, it, ___) => TextButton(
+                  onPressed: it.isNotEmpty ? undoRedoStack.value.undo : null,
+                  child: const Text('Undo'),
+                ),
               ),
               ValueListenableBuilder<bool>(
-                valueListenable: undoRedoStack.value._canRedo,
+                valueListenable: undoRedoStack.value.canRedo,
                 builder: (_, canRedo, __) {
                   return TextButton(
-                    onPressed:
-                        canRedo ? () => undoRedoStack.value.redo() : null,
+                    onPressed: canRedo ? undoRedoStack.value.redo : null,
                     child: const Text('Redo'),
                   );
                 },
               ),
               TextButton(
+                onPressed: undoRedoStack.value.clear,
                 child: const Text('Clear'),
-                onPressed: () => undoRedoStack.value.clear(),
               ),
               TextButton(
                 //ignore: avoid-passing-async-when-sync-expected

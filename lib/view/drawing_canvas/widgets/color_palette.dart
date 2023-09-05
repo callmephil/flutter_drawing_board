@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 
-class ColorPalette extends HookWidget {
+class ColorPalette extends StatelessWidget {
   const ColorPalette({
     super.key,
     required this.selectedColor,
@@ -21,34 +20,40 @@ class ColorPalette extends HookWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Wrap(
-          spacing: 6,
-          runSpacing: 6,
-          children: [
-            for (final Color color in colors)
-              MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: GestureDetector(
-                  onTap: () => selectedColor.value = color,
-                  child: SizedBox.square(
-                    dimension: 35,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: color,
-                        border: Border.all(
-                          color: selectedColor.value == color
-                              ? Colors.blue
-                              : Colors.grey,
-                          width: 1.5,
+        ValueListenableBuilder(
+          valueListenable: selectedColor,
+          builder: (_, it, __) {
+            return Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                for (final Color color in colors)
+                  MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: GestureDetector(
+                      onTap: () => selectedColor.value = color,
+                      child: SizedBox.square(
+                        dimension: 35,
+                        child: RepaintBoundary(
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: color,
+                              border: Border.all(
+                                color: it == color ? Colors.blue : Colors.grey,
+                                width: 1.5,
+                              ),
+                              borderRadius: const BorderRadius.all(
+                                Radius.circular(5),
+                              ),
+                            ),
+                          ),
                         ),
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(5)),
                       ),
                     ),
                   ),
-                ),
-              ),
-          ],
+              ],
+            );
+          },
         ),
         const SizedBox(height: 10),
         Row(
@@ -56,11 +61,14 @@ class ColorPalette extends HookWidget {
           children: [
             SizedBox.square(
               dimension: 35,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: selectedColor.value,
-                  border: Border.all(color: Colors.blue, width: 1.5),
-                  borderRadius: const BorderRadius.all(Radius.circular(5)),
+              child: ValueListenableBuilder(
+                valueListenable: selectedColor,
+                builder: (_, it, __) => DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: selectedColor.value,
+                    border: Border.all(color: Colors.blue, width: 1.5),
+                    borderRadius: const BorderRadius.all(Radius.circular(5)),
+                  ),
                 ),
               ),
             ),
@@ -93,7 +101,7 @@ class ColorPalette extends HookWidget {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Pick a color!'),
-          content: SingleChildScrollView(
+          content: FittedBox(
             child: ColorPicker(
               pickerColor: color.value,
               onColorChanged: (value) {
