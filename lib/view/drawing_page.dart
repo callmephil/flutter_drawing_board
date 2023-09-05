@@ -9,7 +9,7 @@ import 'package:flutter_drawing_board/view/drawing_canvas/widgets/canvas_side_ba
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 class DrawingPage extends HookWidget {
-  const DrawingPage({Key? key}) : super(key: key);
+  const DrawingPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,34 +23,37 @@ class DrawingPage extends HookWidget {
 
     final canvasGlobalKey = GlobalKey();
 
-    ValueNotifier<Sketch?> currentSketch = useState(null);
-    ValueNotifier<List<Sketch>> allSketches = useState([]);
+    final currentSketch = useState<Sketch?>(null);
+    final allSketches = useState(<Sketch>[]);
 
     final animationController = useAnimationController(
       duration: const Duration(milliseconds: 150),
       initialValue: 1,
     );
+
     return Scaffold(
       body: Stack(
         children: [
-          Container(
-            color: kCanvasColor,
+          SizedBox(
             width: double.maxFinite,
             height: double.maxFinite,
-            child: DrawingCanvas(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              drawingMode: drawingMode,
-              selectedColor: selectedColor,
-              strokeSize: strokeSize,
-              eraserSize: eraserSize,
-              sideBarController: animationController,
-              currentSketch: currentSketch,
-              allSketches: allSketches,
-              canvasGlobalKey: canvasGlobalKey,
-              filled: filled,
-              polygonSides: polygonSides,
-              backgroundImage: backgroundImage,
+            child: ColoredBox(
+              color: kCanvasColor,
+              child: DrawingCanvas(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                drawingMode: drawingMode,
+                selectedColor: selectedColor,
+                strokeSize: strokeSize,
+                eraserSize: eraserSize,
+                sideBarController: animationController,
+                currentSketch: currentSketch,
+                allSketches: allSketches,
+                canvasGlobalKey: canvasGlobalKey,
+                filled: filled,
+                polygonSides: polygonSides,
+                backgroundImage: backgroundImage,
+              ),
             ),
           ),
           Positioned(
@@ -83,10 +86,8 @@ class DrawingPage extends HookWidget {
 }
 
 class _CustomAppBar extends StatelessWidget {
+  const _CustomAppBar({required this.animationController});
   final AnimationController animationController;
-
-  const _CustomAppBar({Key? key, required this.animationController})
-      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +110,7 @@ class _CustomAppBar extends StatelessWidget {
               icon: const Icon(Icons.menu),
             ),
             const Text(
-              'Let\'s Draw',
+              "Let's Draw",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 19,

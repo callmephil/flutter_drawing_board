@@ -2,14 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_drawing_board/view/drawing_canvas/models/drawing_mode.dart';
 
 class Sketch {
-  final List<Offset> points;
-  final Color color;
-  final double size;
-  final SketchType type;
-  final bool filled;
-  final int sides;
-
-  Sketch({
+  const Sketch({
     required this.points,
     this.color = Colors.black,
     this.type = SketchType.scribble,
@@ -19,16 +12,18 @@ class Sketch {
   });
 
   factory Sketch.fromDrawingMode(
-      Sketch sketch, DrawingMode drawingMode, bool filled) {
+    Sketch sketch,
+    DrawingMode drawingMode,
+    bool filled,
+  ) {
     return Sketch(
       points: sketch.points,
       color: sketch.color,
       size: sketch.size,
-      filled: drawingMode == DrawingMode.line ||
-              drawingMode == DrawingMode.pencil ||
-              drawingMode == DrawingMode.eraser
-          ? false
-          : filled,
+      filled: filled &&
+          drawingMode != DrawingMode.line &&
+          drawingMode != DrawingMode.pencil &&
+          drawingMode != DrawingMode.eraser,
       sides: sketch.sides,
       type: () {
         switch (drawingMode) {
@@ -44,6 +39,7 @@ class Sketch {
             return SketchType.circle;
           case DrawingMode.polygon:
             return SketchType.polygon;
+          // ignore: no_default_cases
           default:
             return SketchType.scribble;
         }
@@ -51,8 +47,31 @@ class Sketch {
     );
   }
 
+  factory Sketch.fromJson(Map<String, dynamic> json) {
+    final points = (json['points'] as List<Map<String, dynamic>>)
+        .map(_offsetFromJson)
+        .toList();
+
+    return Sketch(
+      points: points,
+      color: (json['color'] as String).toColor(),
+      size: json['size'] as double,
+      filled: json['filled'] as bool,
+      type: (json['type'] as String).toSketchTypeEnum(),
+      sides: json['sides'] as int,
+    );
+  }
+
+  final List<Offset> points;
+  final Color color;
+  final double size;
+  final SketchType type;
+  final bool filled;
+  final int sides;
+
   Map<String, dynamic> toJson() {
-    List<Map> pointsMap = points.map((e) => {'dx': e.dx, 'dy': e.dy}).toList();
+    final pointsMap = points.map(_offsetToJson).toList();
+
     return {
       'points': pointsMap,
       'color': color.toHex(),
@@ -63,29 +82,27 @@ class Sketch {
     };
   }
 
-  factory Sketch.fromJson(Map<String, dynamic> json) {
-    List<Offset> points =
-        (json['points'] as List).map((e) => Offset(e['dx'], e['dy'])).toList();
-    return Sketch(
-      points: points,
-      color: (json['color'] as String).toColor(),
-      size: json['size'],
-      filled: json['filled'],
-      type: (json['type'] as String).toSketchTypeEnum(),
-      sides: json['sides'],
-    );
+  static Offset _offsetFromJson(Map<String, dynamic> json) {
+    final dx = (json['dx'] as num).toDouble();
+    final dy = (json['dy'] as num).toDouble();
+
+    return Offset(dx, dy);
+  }
+
+  static Map<String, dynamic> _offsetToJson(Offset offset) {
+    return {'dx': offset.dx, 'dy': offset.dy};
   }
 }
 
 enum SketchType { scribble, eraser, line, square, circle, polygon }
 
 extension SketchTypeX on SketchType {
-  toRegularString() => toString().split('.')[1];
+  String toRegularString() => toString().split('.')[1];
 }
 
 extension SketchTypeExtension on String {
-  toSketchTypeEnum() =>
-      SketchType.values.firstWhere((e) => e.toString() == 'SketchType.${this}');
+  SketchType toSketchTypeEnum() =>
+      SketchType.values.firstWhere((e) => e.toString() == 'SketchType.$this');
 }
 
 extension ColorExtension on String {
@@ -94,11 +111,10 @@ extension ColorExtension on String {
     if (hexColor.length == 6) {
       hexColor = 'FF$hexColor';
     }
-    if (hexColor.length == 8) {
-      return Color(int.parse('0x$hexColor'));
-    } else {
-      return Colors.black;
-    }
+
+    return hexColor.length == 8
+        ? Color(int.parse('0x$hexColor'))
+        : Colors.black;
   }
 }
 
