@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
-// import 'package:file_picker/file_picker.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Image;
@@ -52,7 +51,7 @@ class CanvasSideBar extends StatelessWidget {
       padding: const EdgeInsets.all(10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
+        children: <Widget>[
           const SizedBox(height: 10),
           const Text(
             'Shapes',
@@ -63,55 +62,60 @@ class CanvasSideBar extends StatelessWidget {
             child: ValueListenableBuilder(
               valueListenable: drawingMode,
               builder: (_, it, __) {
-                return Wrap(
-                  spacing: 5,
-                  runSpacing: 5,
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _IconBox(
-                      iconData: Icons.edit_outlined,
-                      selected: it == DrawingMode.pencil,
-                      onTap: () => drawingMode.value = DrawingMode.pencil,
-                      tooltip: 'Pencil',
-                    ),
-                    _IconBox(
-                      selected: it == DrawingMode.line,
-                      onTap: () => drawingMode.value = DrawingMode.line,
-                      tooltip: 'Line',
-                      child: Center(
-                        child: SizedBox(
-                          width: 22,
-                          height: 2,
-                          child: ColoredBox(
-                            color: drawingMode.value == DrawingMode.line
-                                ? Colors.grey.shade900
-                                : Colors.grey,
+                    Wrap(
+                      spacing: 5,
+                      runSpacing: 5,
+                      children: [
+                        _IconBox(
+                          iconData: Icons.edit_outlined,
+                          selected: it == DrawingMode.pencil,
+                          onTap: () => drawingMode.value = DrawingMode.pencil,
+                          tooltip: 'Pencil',
+                        ),
+                        _IconBox(
+                          selected: it == DrawingMode.line,
+                          onTap: () => drawingMode.value = DrawingMode.line,
+                          tooltip: 'Line',
+                          child: Center(
+                            child: SizedBox(
+                              width: 22,
+                              height: 2,
+                              child: ColoredBox(
+                                color: drawingMode.value == DrawingMode.line
+                                    ? Colors.grey.shade900
+                                    : Colors.grey,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                    _IconBox(
-                      iconData: Icons.hexagon_outlined,
-                      selected: it == DrawingMode.polygon,
-                      onTap: () => drawingMode.value = DrawingMode.polygon,
-                      tooltip: 'Polygon',
+                        _IconBox(
+                          iconData: Icons.hexagon_outlined,
+                          selected: it == DrawingMode.polygon,
+                          onTap: () => drawingMode.value = DrawingMode.polygon,
+                          tooltip: 'Polygon',
+                        ),
+                        _IconBox(
+                          iconData: Icons.square_outlined,
+                          selected: it == DrawingMode.square,
+                          onTap: () => drawingMode.value = DrawingMode.square,
+                          tooltip: 'Square',
+                        ),
+                        _IconBox(
+                          iconData: Icons.circle_outlined,
+                          selected: it == DrawingMode.circle,
+                          onTap: () => drawingMode.value = DrawingMode.circle,
+                          tooltip: 'Circle',
+                        ),
+                      ],
                     ),
                     _IconBox(
                       iconData: Icons.edit_off_outlined,
                       selected: it == DrawingMode.eraser,
                       onTap: () => drawingMode.value = DrawingMode.eraser,
                       tooltip: 'Eraser',
-                    ),
-                    _IconBox(
-                      iconData: Icons.square_outlined,
-                      selected: it == DrawingMode.square,
-                      onTap: () => drawingMode.value = DrawingMode.square,
-                      tooltip: 'Square',
-                    ),
-                    _IconBox(
-                      iconData: Icons.circle_outlined,
-                      selected: it == DrawingMode.circle,
-                      onTap: () => drawingMode.value = DrawingMode.circle,
-                      tooltip: 'Circle',
                     ),
                   ],
                 );
