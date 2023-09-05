@@ -53,274 +53,254 @@ class CanvasSideBar extends HookWidget {
     );
     final scrollController = useScrollController();
 
-    return SizedBox(
-      width: 300,
-      height: MediaQuery.of(context).size.height < 680 ? 450 : 610,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius:
-              const BorderRadius.horizontal(right: Radius.circular(10)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.shade200,
-              blurRadius: 3,
-              offset: const Offset(3, 3),
-            ),
-          ],
-        ),
-        child: Scrollbar(
-          controller: scrollController,
-          thumbVisibility: true,
-          trackVisibility: true,
-          child: ListView(
-            padding: const EdgeInsets.all(10),
-            controller: scrollController,
+    return Scrollbar(
+      controller: scrollController,
+      thumbVisibility: true,
+      trackVisibility: true,
+      child: ListView(
+        padding: const EdgeInsets.all(10),
+        controller: scrollController,
+        children: [
+          const SizedBox(height: 10),
+          const Text(
+            'Shapes',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const Divider(),
+          Wrap(
+            spacing: 5,
+            runSpacing: 5,
             children: [
-              const SizedBox(height: 10),
-              const Text(
-                'Shapes',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              _IconBox(
+                iconData: FontAwesomeIcons.pencil,
+                selected: drawingMode.value == DrawingMode.pencil,
+                onTap: () => drawingMode.value = DrawingMode.pencil,
+                tooltip: 'Pencil',
               ),
-              const Divider(),
-              Wrap(
-                spacing: 5,
-                runSpacing: 5,
-                children: [
-                  _IconBox(
-                    iconData: FontAwesomeIcons.pencil,
-                    selected: drawingMode.value == DrawingMode.pencil,
-                    onTap: () => drawingMode.value = DrawingMode.pencil,
-                    tooltip: 'Pencil',
-                  ),
-                  _IconBox(
-                    selected: drawingMode.value == DrawingMode.line,
-                    onTap: () => drawingMode.value = DrawingMode.line,
-                    tooltip: 'Line',
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SizedBox(
-                          width: 22,
-                          height: 2,
-                          child: ColoredBox(
-                            color: drawingMode.value == DrawingMode.line
-                                ? Colors.grey.shade900
-                                : Colors.grey,
-                          ),
-                        ),
-                      ],
+              _IconBox(
+                selected: drawingMode.value == DrawingMode.line,
+                onTap: () => drawingMode.value = DrawingMode.line,
+                tooltip: 'Line',
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 22,
+                      height: 2,
+                      child: ColoredBox(
+                        color: drawingMode.value == DrawingMode.line
+                            ? Colors.grey.shade900
+                            : Colors.grey,
+                      ),
                     ),
-                  ),
-                  _IconBox(
-                    iconData: Icons.hexagon_outlined,
-                    selected: drawingMode.value == DrawingMode.polygon,
-                    onTap: () => drawingMode.value = DrawingMode.polygon,
-                    tooltip: 'Polygon',
-                  ),
-                  _IconBox(
-                    iconData: FontAwesomeIcons.eraser,
-                    selected: drawingMode.value == DrawingMode.eraser,
-                    onTap: () => drawingMode.value = DrawingMode.eraser,
-                    tooltip: 'Eraser',
-                  ),
-                  _IconBox(
-                    iconData: FontAwesomeIcons.square,
-                    selected: drawingMode.value == DrawingMode.square,
-                    onTap: () => drawingMode.value = DrawingMode.square,
-                    tooltip: 'Square',
-                  ),
-                  _IconBox(
-                    iconData: FontAwesomeIcons.circle,
-                    selected: drawingMode.value == DrawingMode.circle,
-                    onTap: () => drawingMode.value = DrawingMode.circle,
-                    tooltip: 'Circle',
-                  ),
-                ],
+                  ],
+                ),
               ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  const Text(
-                    'Fill Shape: ',
-                    style: TextStyle(fontSize: 12),
-                  ),
-                  Checkbox(
-                    value: filled.value,
-                    onChanged: (val) {
-                      filled.value = val ?? false;
-                    },
-                  ),
-                ],
+              _IconBox(
+                iconData: Icons.hexagon_outlined,
+                selected: drawingMode.value == DrawingMode.polygon,
+                onTap: () => drawingMode.value = DrawingMode.polygon,
+                tooltip: 'Polygon',
               ),
-
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 150),
-                child: drawingMode.value == DrawingMode.polygon
-                    ? Row(
-                        children: [
-                          const Text(
-                            'Polygon Sides: ',
-                            style: TextStyle(fontSize: 12),
-                          ),
-                          Slider(
-                            value: polygonSides.value.toDouble(),
-                            min: 3,
-                            max: 8,
-                            onChanged: (val) {
-                              polygonSides.value = val.toInt();
-                            },
-                            label: '${polygonSides.value}',
-                            divisions: 5,
-                          ),
-                        ],
-                      )
-                    : const SizedBox.shrink(),
+              _IconBox(
+                iconData: FontAwesomeIcons.eraser,
+                selected: drawingMode.value == DrawingMode.eraser,
+                onTap: () => drawingMode.value = DrawingMode.eraser,
+                tooltip: 'Eraser',
               ),
-              const SizedBox(height: 10),
+              _IconBox(
+                iconData: FontAwesomeIcons.square,
+                selected: drawingMode.value == DrawingMode.square,
+                onTap: () => drawingMode.value = DrawingMode.square,
+                tooltip: 'Square',
+              ),
+              _IconBox(
+                iconData: FontAwesomeIcons.circle,
+                selected: drawingMode.value == DrawingMode.circle,
+                onTap: () => drawingMode.value = DrawingMode.circle,
+                tooltip: 'Circle',
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
               const Text(
-                'Colors',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                'Fill Shape: ',
+                style: TextStyle(fontSize: 12),
               ),
-              const Divider(),
-              ColorPalette(
-                selectedColor: selectedColor,
+              Checkbox(
+                value: filled.value,
+                onChanged: (val) {
+                  filled.value = val ?? false;
+                },
               ),
-              const SizedBox(height: 20),
+            ],
+          ),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 150),
+            child: drawingMode.value == DrawingMode.polygon
+                ? Row(
+                    children: [
+                      const Text(
+                        'Polygon Sides: ',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                      Slider(
+                        value: polygonSides.value.toDouble(),
+                        min: 3,
+                        max: 8,
+                        onChanged: (val) {
+                          polygonSides.value = val.toInt();
+                        },
+                        label: '${polygonSides.value}',
+                        divisions: 5,
+                      ),
+                    ],
+                  )
+                : const SizedBox.shrink(),
+          ),
+          const SizedBox(height: 10),
+          const Text(
+            'Colors',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const Divider(),
+          ColorPalette(
+            selectedColor: selectedColor,
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'Size',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const Divider(),
+          Row(
+            children: [
               const Text(
-                'Size',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                'Stroke Size: ',
+                style: TextStyle(fontSize: 12),
               ),
-              const Divider(),
-              Row(
-                children: [
-                  const Text(
-                    'Stroke Size: ',
-                    style: TextStyle(fontSize: 12),
-                  ),
-                  Slider(
-                    value: strokeSize.value,
-                    min: 1,
-                    max: 50,
-                    divisions: 50,
-                    label: strokeSize.value.toStringAsFixed(0),
-                    onChanged: (val) {
-                      strokeSize.value = val;
-                    },
-                  ),
-                ],
+              Slider(
+                value: strokeSize.value,
+                min: 1,
+                max: 50,
+                divisions: 50,
+                label: strokeSize.value.toStringAsFixed(0),
+                onChanged: (val) {
+                  strokeSize.value = val;
+                },
               ),
-              Row(
-                children: [
-                  const Text(
-                    'Eraser Size: ',
-                    style: TextStyle(fontSize: 12),
-                  ),
-                  Slider(
-                    value: eraserSize.value,
-                    min: 1,
-                    max: 80,
-                    divisions: 80,
-                    label: eraserSize.value.toStringAsFixed(0),
-                    onChanged: (val) {
-                      eraserSize.value = val;
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
+            ],
+          ),
+          Row(
+            children: [
               const Text(
-                'Actions',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                'Eraser Size: ',
+                style: TextStyle(fontSize: 12),
               ),
-              const Divider(),
-              Wrap(
-                children: [
-                  TextButton(
-                    onPressed: allSketches.value.isNotEmpty
-                        ? () => undoRedoStack.value.undo()
-                        : null,
-                    child: const Text('Undo'),
-                  ),
-                  ValueListenableBuilder<bool>(
-                    valueListenable: undoRedoStack.value._canRedo,
-                    builder: (_, canRedo, __) {
-                      return TextButton(
-                        onPressed:
-                            canRedo ? () => undoRedoStack.value.redo() : null,
-                        child: const Text('Redo'),
-                      );
-                    },
-                  ),
-                  TextButton(
-                    child: const Text('Clear'),
-                    onPressed: () => undoRedoStack.value.clear(),
-                  ),
-                  TextButton(
-                    //ignore: avoid-passing-async-when-sync-expected
-                    onPressed: () async {
-                      backgroundImage.value = backgroundImage.value != null
-                          ? null
-                          : await _getImage;
-                    },
-                    child: Text(
-                      backgroundImage.value == null
-                          ? 'Add Background'
-                          : 'Remove Background',
-                    ),
-                  ),
-                  TextButton(
-                    child: const Text('Fork on Github'),
-                    onPressed: () => _launchUrl(kGithubRepo),
-                  ),
-                ],
+              Slider(
+                value: eraserSize.value,
+                min: 1,
+                max: 80,
+                divisions: 80,
+                label: eraserSize.value.toStringAsFixed(0),
+                onChanged: (val) {
+                  eraserSize.value = val;
+                },
               ),
-              const SizedBox(height: 20),
-              const Text(
-                'Export',
-                style: TextStyle(fontWeight: FontWeight.bold),
+            ],
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'Actions',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const Divider(),
+          Wrap(
+            children: [
+              TextButton(
+                onPressed: allSketches.value.isNotEmpty
+                    ? () => undoRedoStack.value.undo()
+                    : null,
+                child: const Text('Undo'),
               ),
-              const Divider(),
-              Row(
-                children: [
-                  SizedBox(
-                    width: 140,
-                    child: TextButton(
-                      child: const Text('Export PNG'),
-                      //ignore: avoid-passing-async-when-sync-expected
-                      onPressed: () async {
-                        final pngBytes = await getBytes();
-                        if (pngBytes != null) await saveFile(pngBytes, 'png');
-                      },
-                    ),
-                  ),
-                  SizedBox(
-                    width: 140,
-                    child: TextButton(
-                      child: const Text('Export JPEG'),
-                      //ignore: avoid-passing-async-when-sync-expected
-                      onPressed: () async {
-                        final pngBytes = await getBytes();
-                        if (pngBytes != null) await saveFile(pngBytes, 'jpeg');
-                      },
-                    ),
-                  ),
-                ],
+              ValueListenableBuilder<bool>(
+                valueListenable: undoRedoStack.value._canRedo,
+                builder: (_, canRedo, __) {
+                  return TextButton(
+                    onPressed:
+                        canRedo ? () => undoRedoStack.value.redo() : null,
+                    child: const Text('Redo'),
+                  );
+                },
               ),
-              // add about me button or follow buttons
-              const Divider(),
-              Center(
-                child: GestureDetector(
-                  onTap: () => _launchUrl('https://github.com/JideGuru'),
-                  child: const Text(
-                    'Made with 💙 by JideGuru',
-                    style: TextStyle(fontSize: 12),
-                  ),
+              TextButton(
+                child: const Text('Clear'),
+                onPressed: () => undoRedoStack.value.clear(),
+              ),
+              TextButton(
+                //ignore: avoid-passing-async-when-sync-expected
+                onPressed: () async {
+                  backgroundImage.value =
+                      backgroundImage.value != null ? null : await _getImage;
+                },
+                child: Text(
+                  backgroundImage.value == null
+                      ? 'Add Background'
+                      : 'Remove Background',
+                ),
+              ),
+              TextButton(
+                child: const Text('Fork on Github'),
+                onPressed: () => _launchUrl(kGithubRepo),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'Export',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const Divider(),
+          Row(
+            children: [
+              SizedBox(
+                width: 140,
+                child: TextButton(
+                  child: const Text('Export PNG'),
+                  //ignore: avoid-passing-async-when-sync-expected
+                  onPressed: () async {
+                    final pngBytes = await getBytes();
+                    if (pngBytes != null) await saveFile(pngBytes, 'png');
+                  },
+                ),
+              ),
+              SizedBox(
+                width: 140,
+                child: TextButton(
+                  child: const Text('Export JPEG'),
+                  //ignore: avoid-passing-async-when-sync-expected
+                  onPressed: () async {
+                    final pngBytes = await getBytes();
+                    if (pngBytes != null) await saveFile(pngBytes, 'jpeg');
+                  },
                 ),
               ),
             ],
           ),
-        ),
+          // add about me button or follow buttons
+          const Divider(),
+          Center(
+            child: GestureDetector(
+              onTap: () => _launchUrl('https://github.com/JideGuru'),
+              child: const Text(
+                'Made with 💙 by JideGuru',
+                style: TextStyle(fontSize: 12),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -421,9 +401,8 @@ class _IconBox extends StatelessWidget {
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: onTap,
-        child: SizedBox(
-          height: 35,
-          width: 35,
+        child: SizedBox.square(
+          dimension: 35,
           child: DecoratedBox(
             decoration: BoxDecoration(
               border: Border.all(

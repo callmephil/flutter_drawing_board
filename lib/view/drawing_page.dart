@@ -32,92 +32,49 @@ class DrawingPage extends HookWidget {
     );
 
     return Scaffold(
-      body: Stack(
-        children: [
-          SizedBox(
-            width: double.maxFinite,
-            height: double.maxFinite,
-            child: ColoredBox(
-              color: kCanvasColor,
-              child: DrawingCanvas(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height,
-                drawingMode: drawingMode,
-                selectedColor: selectedColor,
-                strokeSize: strokeSize,
-                eraserSize: eraserSize,
-                sideBarController: animationController,
-                currentSketch: currentSketch,
-                allSketches: allSketches,
-                canvasGlobalKey: canvasGlobalKey,
-                filled: filled,
-                polygonSides: polygonSides,
-                backgroundImage: backgroundImage,
-              ),
-            ),
-          ),
-          Positioned(
-            top: kToolbarHeight + 10,
-            // left: -5,
-            child: SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(-1, 0),
-                end: Offset.zero,
-              ).animate(animationController),
-              child: CanvasSideBar(
-                drawingMode: drawingMode,
-                selectedColor: selectedColor,
-                strokeSize: strokeSize,
-                eraserSize: eraserSize,
-                currentSketch: currentSketch,
-                allSketches: allSketches,
-                canvasGlobalKey: canvasGlobalKey,
-                filled: filled,
-                polygonSides: polygonSides,
-                backgroundImage: backgroundImage,
-              ),
-            ),
-          ),
-          _CustomAppBar(animationController: animationController),
-        ],
+      drawer: Drawer(
+        child: CanvasSideBar(
+          drawingMode: drawingMode,
+          selectedColor: selectedColor,
+          strokeSize: strokeSize,
+          eraserSize: eraserSize,
+          currentSketch: currentSketch,
+          allSketches: allSketches,
+          canvasGlobalKey: canvasGlobalKey,
+          filled: filled,
+          polygonSides: polygonSides,
+          backgroundImage: backgroundImage,
+        ),
       ),
-    );
-  }
-}
-
-class _CustomAppBar extends StatelessWidget {
-  const _CustomAppBar({required this.animationController});
-  final AnimationController animationController;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: kToolbarHeight,
-      width: double.maxFinite,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            IconButton(
-              onPressed: () {
-                if (animationController.value == 0) {
-                  animationController.forward();
-                } else {
-                  animationController.reverse();
-                }
-              },
-              icon: const Icon(Icons.menu),
-            ),
-            const Text(
-              "Let's Draw",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 19,
-              ),
-            ),
-            const SizedBox.shrink(),
-          ],
+      appBar: AppBar(
+        title: const Text(
+          "Let's Draw",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 19,
+          ),
+        ),
+      ),
+      body: SizedBox(
+        width: double.maxFinite,
+        height: double.maxFinite,
+        child: ColoredBox(
+          color: kCanvasColor,
+          child: DrawingCanvas(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            drawingMode: drawingMode,
+            selectedColor: selectedColor,
+            strokeSize: strokeSize,
+            eraserSize: eraserSize,
+            sideBarController: animationController,
+            currentSketch: currentSketch,
+            allSketches: allSketches,
+            canvasGlobalKey: canvasGlobalKey,
+            filled: filled,
+            polygonSides: polygonSides,
+            backgroundImage: backgroundImage,
+          ),
         ),
       ),
     );

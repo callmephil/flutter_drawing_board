@@ -22,18 +22,16 @@ class ColorPalette extends HookWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Wrap(
-          alignment: WrapAlignment.center,
-          spacing: 2,
-          runSpacing: 2,
+          spacing: 6,
+          runSpacing: 6,
           children: [
             for (final Color color in colors)
               MouseRegion(
                 cursor: SystemMouseCursors.click,
                 child: GestureDetector(
                   onTap: () => selectedColor.value = color,
-                  child: SizedBox(
-                    height: 25,
-                    width: 25,
+                  child: SizedBox.square(
+                    dimension: 35,
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         color: color,
@@ -56,9 +54,8 @@ class ColorPalette extends HookWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(
-              height: 30,
-              width: 30,
+            SizedBox.square(
+              dimension: 35,
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: selectedColor.value,
@@ -76,8 +73,8 @@ class ColorPalette extends HookWidget {
                 },
                 child: SvgPicture.asset(
                   'assets/svgs/color_wheel.svg',
-                  height: 30,
-                  width: 30,
+                  height: 35,
+                  width: 35,
                 ),
               ),
             ),
